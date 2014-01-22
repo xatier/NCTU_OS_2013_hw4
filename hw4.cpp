@@ -38,8 +38,9 @@ void *go (void *arg) {
     int ts = ((struct Args *)arg)->ts;
     int u = ((struct Args *)arg)->u;
 
-    pthread_mutex_lock (&mutexsum);
     struct Account *acct = q[u];
+
+    pthread_mutex_lock (&mutexsum);
     mark[u]++;
     pthread_mutex_unlock (&mutexsum);
 
@@ -67,11 +68,11 @@ void *go (void *arg) {
             printf("%d u: %d / acct.id: %d -> %d [%d]\n", ts, u, acct->id, instr_.to, amount);
             if (acct->balance >= amount) {
                 pthread_mutex_lock (&mutexsum);
-                acct->balance -= amount;
-                pthread_mutex_unlock (&mutexsum);
 
+                acct->balance -= amount;
                 user_list[to].balance += amount;
                 mark[u]++;
+
                 pthread_mutex_unlock (&mutexsum);
             }
         }
@@ -97,7 +98,7 @@ void run (void) {
     pthread_attr_t attr;
     pthread_mutex_init(&mutexsum, NULL);
     pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
     int ts = 0;
     get_last = 0;
@@ -120,9 +121,9 @@ void run (void) {
         }
         pthread_attr_destroy(&attr);
 
-        for (int i = 0; i < num_thread; i++) {
-            pthread_join(threads[i], &status);
-        }
+        // for (int i = 0; i < num_thread; i++) {
+        //     pthread_join(threads[i], &status);
+        // }
 
 
         for (int i = 0; i < num_thread; i++) {
